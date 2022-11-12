@@ -6,11 +6,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-<<<<<<< HEAD
+
     "run" :"npm run server"
-=======
-    "start" :"npm run server/index.js"
->>>>>>> 1d71cc0ef72f76ff720a348355685a7519ae7320
     
     
   },
