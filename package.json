@@ -1,0 +1,22 @@
+{
+  "dependencies": {
+    "requirejs": "^2.3.6"
+  },
+  "name": "senior-project",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "run" :"npm run server"
+    
+    
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "npm-run-all": "^4.1.5",
+    "request": "^2.88.2"
+  },
+  "description": ""
+}
