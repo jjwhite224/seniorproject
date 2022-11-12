@@ -7,7 +7,7 @@
   "main": "index.js",
   "scripts": {
 
-    "run" :"npm run server"
+    "start" :"npm run server"
     
     
   },
