@@ -6,7 +6,13 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+<<<<<<< HEAD
     "start": "npm run server"
+=======
+    "start":"node server/index.js"
+    
+    
+>>>>>>> 1d582422f5f9f31ea25c8d3dfed4c57e6ecc4a37
   },
   "author": "",
   "license": "ISC",
