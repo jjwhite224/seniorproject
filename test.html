@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.3/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.3/addons/p5.dom.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.3/addons/p5.sound.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <meta charset="utf-8" />
+
+  </head>
+  <body>
+     <script  async=false defer=false id="hljs" src="https://sdk.scdn.co/spotify-player.js"></script>
+    
+     
+    <script>
+     
+    
+
+  
+  let analysisJSON;
+  let trackJSON;
+  let trackLoaded = false;
+  let analysisLoaded = false;
+let songTime;
+let songDur;
+let statechanged = false;
+let player;
+let isPrepared = false;
+
+  
+//console.log(getToken())
+var script = document.querySelector('#hljs');
+script.addEventListener('load', function(){auth = getToken('http://localhost:5000/token',spotify);})
+ function spotify(auth){
+ //console.log(auth)
+ window.onSpotifyWebPlaybackSDKReady = () => {
+        //const token = 'BQBsEuCL8AnwFJCiIqTeHrAiUPwQQMmPz-EhtFHQkFWFUjJEQ3YAS7SLDCwQiMJdBg3cI1p2OX3SG0NKBYQ-44JypdC041QcmzKG-NImZ-FSVF4osjKPNfZzBAU0wIOdhwjoY95xJwEt-dJe43v8-o20bPUnUFLb4Y-yxDr4kpbQdr1phAJLLeqUM3EhIBXgVnp2YCuCsEmP9QDF1v7hbzQ'
+            const token = auth.access_token;
+            console.log(token);
+            player = new Spotify.Player({
+                name: 'Luna',
+                getOAuthToken: cb => { cb(token); },
+                volume: 0.5
+            });
+
+            // Ready
+            player.addListener('ready', ({ device_id }) => {
+                console.log('Ready with Device ID', device_id);
+                
+            });
+
+            // Not Ready
+            player.addListener('not_ready', ({ device_id }) => {
+                console.log('Device ID has gone offline', device_id);
+                
+            });
+
+            player.addListener('initialization_error', ({ message }) => {
+                console.error(message);
+            });
+
+            player.addListener('authentication_error', ({ message }) => {
+                console.error(message);
+                auth = getToken('http://localhost:5000/refresh_token');
+                console.log(auth)
+            });
+
+            player.addListener('account_error', ({ message }) => {
+                console.error(message);
+            });
+
+            
+        
+        player.addListener('player_state_changed', ({
+   position,
+   duration,
+  track_window: { current_track }
+}) => {
+  statechanged = true;
+  isPrepared = true;
+  console.log('Currently Playing', current_track);
+  console.log('Position in Song', position);
+  console.log('Duration of Song', duration);
+  state = player.getCurrentState();
+ let track = fetch ('https://api.spotify.com/v1/audio-features/'+current_track.id,{method:'GET', headers:{"Authorization":'Bearer '+ token,
+ 'Accept' :'application/json'                                                                                    }})
+.then(response => response.json())
+//.then(json => parseJSON(json.album.images)) ;
+.then(json => {//img.src = json.album.images[0].url
+  //console.log(trackJSON);
+  console.log(token);
+  let dataJSON = fetch (json.analysis_url,{method:'GET', headers:{"Authorization":'Bearer ' + token,
+'Content-Type':'application/json',
+ 'Accept' :'application/json'                                                                                    }})
+.then(response => response.json())
+.then(json =>{
+  //console.log(json)
+  analysisJSON = json;
+  analysisLoaded = true;
+})
+ let infoJSON = fetch (json.track_href,{method:'GET', headers:{"Authorization":'Bearer ' +token,
+'Content-Type':'application/json',
+ 'Accept' :'application/json'                                                                                    }})
+ .then(response => response.json())
+ .then(json => {
+  trackJSON = json;
+  trackLoaded = true;
+ })
+})
+
+
+
+
+
+//document.body.appendChild(img);
+
+
+  
+      })
+      player.connect(); 
+        }
+    }
+async function getToken(url,callback){
+  fetch(url)
+  //const auth = await authData.json()
+  .then((response) => response.json())
+  .then((json) => callback(json))
+  //console.log(auth);
+  //return auth
+}
+  
+//main();
+  
+      
+       
+        
+        
+      
+
+        
+
+    </script>
+    <script src="lyrics.js"></script>
+  </body>
+</html>
