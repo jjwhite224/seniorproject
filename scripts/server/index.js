@@ -9,7 +9,12 @@ var router = express.Router();
 const port = 5000
 var access_token
 
-app.get('/login', function(req, res) {
+app.all('/', function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+  next()
+});
+app.get('/login', function(req, res,next) {
 
   var state = generateRandomString(16);
   var scope = 'streaming user-read-private user-read-email';
@@ -22,7 +27,7 @@ state: state})
     auth_query_parameters.toString());
 })
 
-    app.get('/callback', (req, res) => {
+    app.get('/callback', (req, res,next) => {
 
       var code = req.query.code;
     
@@ -48,7 +53,7 @@ state: state})
       });
     })
 
-    app.get('/token', (req, res) => {
+    app.get('/token', (req, res,next) => {
       res.json(
          {
             access_token: access_token
@@ -56,12 +61,14 @@ state: state})
     })
 
 //console.log(access_token)
-app.get('/refresh_token', function(req, res) {
+app.get('/refresh_token', function(req, res,next) {
 
   var refresh_token = req.query.refresh_token;
   var authOptions = {
     url: 'https://accounts.spotify.com/api/token',
-    headers: { 'Authorization': 'Basic ' + (new Buffer.from(client_id + ':' + spotify_client_secret).toString('base64')) },
+    headers: { 'Authorization': 'Basic ' + (Buffer.from(client_id + ':' + spotify_client_secret).toString('base64')), 
+    'Content-Type' : 'application/x-www-form-urlencoded'
+  },
     form: {
       grant_type: 'refresh_token',
       refresh_token: refresh_token

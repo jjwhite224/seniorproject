@@ -62,8 +62,9 @@ script.addEventListener('load', function(){auth = getToken('http://localhost:500
 
             player.addListener('authentication_error', ({ message }) => {
                 console.error(message);
-                auth = getToken('http://localhost:5000/refresh_token');
-                console.log(auth)
+                getToken('http://localhost:5000/refresh_token')
+                .then(response => console.log(response))
+                
             });
 
             player.addListener('account_error', ({ message }) => {
