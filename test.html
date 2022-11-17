@@ -28,6 +28,8 @@ let statechanged = false;
 let player;
 let isPrepared = false;
 
+let duration;
+
   
 //console.log(getToken())
 var script = document.querySelector('#hljs');
@@ -78,6 +80,7 @@ script.addEventListener('load', function(){auth = getToken('http://localhost:500
    duration,
   track_window: { current_track }
 }) => {
+  clear();
   statechanged = true;
   isPrepared = true;
   console.log('Currently Playing', current_track);
@@ -99,6 +102,7 @@ script.addEventListener('load', function(){auth = getToken('http://localhost:500
   //console.log(json)
   analysisJSON = json;
   analysisLoaded = true;
+  
 })
  let infoJSON = fetch (json.track_href,{method:'GET', headers:{"Authorization":'Bearer ' +token,
 'Content-Type':'application/json',
@@ -119,6 +123,7 @@ script.addEventListener('load', function(){auth = getToken('http://localhost:500
 
   
       })
+      
       player.connect(); 
         }
     }

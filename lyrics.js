@@ -6,33 +6,45 @@
 var artist;
 var songname;
 var trackPic;
-let angle = 0;
+let angle = [];
 let w = 24;
 let ma;
 let maxD;
 
 let a;
+let cRange;
+let quantcolors = [];
 
-
+let songlength;
+let amp;
+let particles = [];
+let particlesFull = false;
+let pitchesFull = false;
+//const noiseScale = .1;
 function setup(){
-    //createCanvas(400,400,WEBGL);
-    createCanvas(displayWidth,displayHeight);
-    noStroke();
+    //createCanvas(400,400);
+    createCanvas(windowWidth,windowHeight);
+    fullscreen();
+    //noStroke();
+    //strokeWeight(2);
     mastodon =  loadFont('assets/MASTOD__.ttf')
-    textFont(mastodon,144);
+    textFont(mastodon,64);
     textAlign(CENTER,CENTER);
    // imageMode(CENTER);
    ma = atan(cos(QUARTER_PI));
   maxD = dist(0, 0, 200, 200);
+  //angleMode(DEGREES)
+  //clear();
 }
 
 function draw() {
-  frameRate(30)
-  background(0);
+  
+ // frameRate(1)
+  //background(0);
   loadLyrics();
   //fill(0,4);
   //screenText = createGraphics(width,height);
-  text(songname+' by '+artist,displayWidth/2,displayHeight/1.5);
+  
   //drawingContext.disable(drawingContext.DEPTH_TEST)
   //drawingContext.enable(drawingContext.BLEND)
  // image(screenText, -width/2, -height/2)
@@ -41,12 +53,63 @@ function draw() {
  // }
  //translate(width/2, height/2);
  //rectMode(CENTER);
+ 
   if (analysisLoaded == true){
-    console.log(analysisJSON);
-    drawCube(analysisJSON);
+    //console.log(analysisJSON);
+    let rectColor=[];
+    
+      let colorFull =false;
+      //console.log(quantcolors);
+      for(let i=0;i < 4;i++) {
+        let c = color(quantcolors[i].r,quantcolors[i].g,quantcolors[i].b);
+        rectColor.push(c);
+        //console.log(c)
+
+      }
+      if (rectColor.length == quantcolors.length) {
+        
+        colorFull = true;
+if (colorFull == true){
+  //console.log(rectColor);
+  colorFull = false;
+}
+//colorFull = false;
+      }
+      
+     
+    //let r = random(rectColor.length)
+    
+    
+    //console.log(rectColor);
     //console.log(songTime);
     //analysisLoaded = false;
-}
+    
+    
+  
+    
+    segmentData  = [];
+    beatData = [];
+    for(let i = 0; i < analysisJSON.segments.length; i++) {
+      const segment = analysisJSON.segments[i];
+      segmentData.push([segment.start,segment.duration,abs(segment.loudness_max),segment.pitches]);
+    }
+    for(let i = 0; i < analysisJSON.beats.length; i++) {
+      const beats = analysisJSON.beats[i];
+      beatData.push([beats.start,beats.duration]);
+    }
+  
+    
+    
+    //console.log(amp);
+    const num = segmentData.length * 2; 
+    const noiseScale = map(analysisJSON.track.tempo,0,300,.001,.01);
+  
+
+    ;
+    //stroke(0);
+    
+    drawCube(particles,beatData,rectColor,noiseScale,num,segmentData,analysisJSON.track.tempo);
+  }
 //.if(isPrepared == true){
 //player.getCurrentState().then(state => {
     //if (!state) {
@@ -66,9 +129,9 @@ function loadLyrics(){
     var lyrics;
     if (trackLoaded == true){
        console.log(trackJSON);
-       trackPic = loadImage(trackJSON.album.images[0].url);
-        songname = trackJSON.name;
-        artist = trackJSON.artists[0].name;
+       trackPic = loadImage(trackJSON.album.images[0].url,getColorPallete);
+        //songname = trackJSON.name;
+        //artist = trackJSON.artists[0].name;
         console.log(songname);
         console.log(artist);
         loadJSON('https://api.musixmatch.com/ws/1.1/track.search?q_track='+songname+'&q_artist='+artist+'&f_has_lyrics=1&apikey=828251934ab71bde5ddf79419d12a713',searchLyrics);
@@ -86,7 +149,7 @@ function searchLyrics(search){
     //console.log(trackId);
     loadJSON("https://api.musixmatch.com/ws/1.1/track.lyrics.get?track_id="+trackId+"&apikey=828251934ab71bde5ddf79419d12a713",getLyrics);
     //loadJSON("https://api.musixmatch.com/ws/1.1/album.get?album_id="+albumID+"&apikey=828251934ab71bde5ddf79419d12a713",getAlbum);
-    loadJSON('http://ws.audioscrobbler.com/2.0/?method=track.getinfo&api_key=	ece64c4337c8a1bfd576483ec3c27355&artist='+artistname+'&track='+trackname+'&format=json',getAlbumart);
+    //loadJSON('http://ws.audioscrobbler.com/2.0/?method=track.getinfo&api_key=	ece64c4337c8a1bfd576483ec3c27355&artist='+artistname+'&track='+trackname+'&format=json',getAlbumart);
 }
 
 function getLyrics(lyricData){
@@ -155,7 +218,7 @@ function dataSplit(lyrics){
   }
 function getColorPallete(albumArt){
   albumArt.loadPixels();
-  var pixels = albumArt.pixel
+  var pixels = albumArt.pixels
   let rgbValues = [];
   for(var i = 0; i < pixels.length; i+=4){
     const rgb = {
@@ -165,41 +228,227 @@ function getColorPallete(albumArt){
     };
     rgbValues.push(rgb);
   }
-console.log(rgbValues);
+  quantcolors = quantization(rgbValues,0);
+  console.log(quantcolors);
 }
+const quantization = (rgbValues, depth) => {
+  const MAX_DEPTH = 2;
 
-function drawCube(json) {
-  //background(0);
- translate(0,height/2);
-  rectMode(CENTER);
-  angleMode(DEGREES)
-  //console.log(json);
-  //for (let z = 0; z < height; z += w) {
-    let offset = 0;
-    let w = 6
-    for (let x = 0; x < width; x += w) {
-      a = angle + offset
-      let h = map(sin(a),-1,1,0,100)
-      //console.log(sin(angle))
-      fill(255)
-      rect(x + w-4,0,w-4,h)
-      //offset += .1;
-      for (let x = 0; x < json.segments.length;x+=1){
-        offset += map(abs(json.segments[x].loudness_max),0,100,0,1);
-        for (let y = 0; y < json.segments[x].pitches.length;y+=1){
-     offset += (json.segments[x].pitches[y],0,1,0,.1);
-      
-      
-      
-        }
-      }  
-      
-    }
-  
-  
-  
-  for (let x = 0; x < json.sections.length;x+=1){
-    angle += map(json.sections[x].tempo,0,1000,1,359);
+  // Base case
+  if (depth === MAX_DEPTH || rgbValues.length === 0) {
+    const color = rgbValues.reduce(
+      (prev, curr) => {
+        prev.r += curr.r;
+        prev.g += curr.g;
+        prev.b += curr.b;
+
+        return prev;
+      },
+      {
+        r: 0,
+        g: 0,
+        b: 0,
+      }
+    );
+
+    color.r = Math.round(color.r / rgbValues.length);
+    color.g = Math.round(color.g / rgbValues.length);
+    color.b = Math.round(color.b / rgbValues.length);
+
+    return [color];
   }
 
+  /**
+   *  Recursively do the following:
+   *  1. Find the pixel channel (red,green or blue) with biggest difference/range
+   *  2. Order by this channel
+   *  3. Divide in half the rgb colors list
+   *  4. Repeat process again, until desired depth or base case
+   */
+  const componentToSortBy = findBiggestColorRange(rgbValues);
+  rgbValues.sort((p1, p2) => {
+    return p1[componentToSortBy] - p2[componentToSortBy];
+  });
+
+  const mid = rgbValues.length / 2;
+  return [
+    ...quantization(rgbValues.slice(0, mid), depth + 1),
+    ...quantization(rgbValues.slice(mid + 1), depth + 1),
+  ];
+};
+
+
+
+function drawCube(particles,beatData,rectColor,noiseScale,num,segmentData,tempo) {
+  rectColor[1].setAlpha(10); 
+  let currentposition; 
+  let pitches = [[]]; 
+//fill()
+noiseSeed(tempo)
+//console.log(amp);
+;
+player.getCurrentState().then(state => {
+  rectColor[1].setAlpha(255)
+  currentposition = floor(state.position/1000)
+  songlength = state.duration/1000
+  songname = state.track_window.current_track.name;
+  artist = state.track_window.current_track.artists[0].name
+  
+
+
+    if (particles.length == num){
+      particlesFull == true;
+    }else{particlesFull = false}
+    if (!particlesFull){
+      for(let i = 0; i < num; i ++) {
+        particles.push(createVector(random(width), random(height)));
+      }
+    }
+      for(let i = 0; i < beatData.length; i++) {
+        //console.log(currentposition,beatData[i][0]);
+    if(floor(currentposition) >= beatData[i][0] && floor(currentposition) <= beatData[i][0]+beatData[i][1] ) {
+       // rectColor[2].setAlpha(100)
+       //noiseSeed(millis())
+      for (let j = 0; j < segmentData.length; j++) {
+        //console.log(segmentData[j]);
+        if(floor(currentposition) >= segmentData[j][0] && floor(currentposition) <= segmentData[j][0]+segmentData[j][1]){  
+      //amp = map(segmentData[j][2],0,100,0,100)
+      //noiseSeed(currentposition)
+      pitches = find3largest(segmentData[j][3],segmentData[j][3].length);
+      amp = segmentData[j][2]
+        //strokeWeight(amp);
+        
+        
+        //console.log(amp);
+        
+      // map(pitches[0][1],0,12,0,255);
+       //pitchColor = (map(pitches[0][1],0,12,0,255));
+       //stroke(map(pitches[0][1],0,12,0,255),map(pitches[0][2],0,12,0,255),map(pitches[0][3],0,12,0,255));
+
+       
+      //console.log(amp)
+    }
+   
+    }
+    strokeWeight(map(pitches[0][1],0,11,1,4));
+   //console.log(pitches)
+   //stroke(map(amp,0,30,0,255),map(amp,0,30,0,255),map(amp,0,30,0,255));
+    rectColor[2].setAlpha(map(noise(amp),0,1,50,255));
+    stroke(rectColor[2]);
+   rectColor[0].setAlpha(map(noise(amp),0,1,50,255));
+    }
+  }
+    
+
+  
+for(let i = 0; i < num; i ++) {
+  let p = particles[i];
+  rectColor[0].setAlpha(50);
+  
+  fill(rectColor[3]);
+  point(p.x,p.y)
+  
+  let n = noise(p.x * noiseScale, p.y * noiseScale, frameCount * noiseScale * noiseScale);
+  let a = TAU * n;
+  p.x += cos(a) * tempo/100;
+  p.y += sin(a) * tempo/100;
+  if(!onScreen(p)) {
+    p.x = random(width);
+    p.y = random(height);
+  }
 }
+for(let i = 0; i < beatData.length; i++) {
+  
+}
+
+fill(rectColor[1]);
+//strokeWeight(2);
+//noStroke();
+text(songname+' by '+artist,width/2,height/2);
+background(rectColor[0])
+})
+   //rectColor[3].setAlpha(10);
+
+}
+
+
+
+
+
+const findBiggestColorRange = (rgbValues) => {
+  
+//console.log(rgbValues);
+let rMin = Number.MAX_VALUE
+let gMin = Number.MAX_VALUE
+let bMin = Number.MAX_VALUE
+
+let rMax = Number.MIN_VALUE
+let gMax = Number.MIN_VALUE
+let bMax = Number.MIN_VALUE
+
+rgbValues.forEach((pixel) => {
+rMin = Math.min(rMin,pixel.r)
+gMin = Math.min(gMin,pixel.g)
+bMin = Math.min(gMin,pixel.b)
+
+rMax =Math.max(rMax,pixel.r)
+gMax = Math.max(gMax,pixel.g)
+bMax =Math.max(bMax,pixel.b)
+});
+  const rRange = rMax - rMin;
+  const gRange = gMax - gMin;
+  const bRange = bMax - bMin;
+  
+  const biggestRange = Math.max(rRange, gRange, bRange);
+  if (biggestRange === rRange) {
+    return 'r'
+  } else if (biggestRange === gRange) {
+    return 'g'
+  } else {
+    return 'b'
+  }
+}
+
+function onScreen(v) {
+  return v.x >= 0 && v.x <= width && v.y >= 0 && v.y <= height;
+}
+
+function find3largest(arr, arr_size)
+{
+    let first, second, third;
+ 
+    // There should be atleast three elements
+    if (arr_size < 3)
+    {
+        //document.write(" Invalid Input ");
+        return;
+    }
+ 
+    third = first = second = [Number.MIN_VALUE];
+    for(let i = 0; i < arr_size; i++)
+    {
+         
+        // If current element is
+        // greater than first
+        if (arr[i] > first[0])
+        {
+            third = second;
+            second = first;
+            first = [arr[i],i]
+        }
+ 
+        // If arr[i] is in between first
+        // and second then update second
+        else if (arr[i] > second[0])
+        {
+            third = second;
+            second = [arr[i],i]
+        }
+ 
+        else if (arr[i] > third[0])
+            third = [arr[i],i]
+    }
+    //console.log(first,second,third);
+   return [first,second,third];
+}
+ 
