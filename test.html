@@ -33,7 +33,7 @@ let duration;
   
 //console.log(getToken())
 var script = document.querySelector('#hljs');
-script.addEventListener('load', function(){auth = getToken('http://localhost:5000/token',spotify);})
+script.addEventListener('load', function(){auth = getToken('https://spotifyvizserver.herokuapp.com/token',spotify);})
  function spotify(auth){
  //console.log(auth)
  window.onSpotifyWebPlaybackSDKReady = () => {
