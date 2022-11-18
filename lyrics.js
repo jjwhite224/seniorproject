@@ -316,8 +316,7 @@ player.getCurrentState().then(state => {
       //noiseSeed(currentposition)
       pitches = find3largest(segmentData[j][3],segmentData[j][3].length);
       amp = segmentData[j][2]
-        //strokeWeight(amp);
-        
+     
         
         //console.log(amp);
         
@@ -327,19 +326,21 @@ player.getCurrentState().then(state => {
 
        
       //console.log(amp)
-    //}
+    //\\}
    
-    //}
+   // }
     
     }
-    //strokeWeight(map(pitches[0][1],-1,11,2,6));
-    strokeWeight(map(amp,0,60,1,12));
-   //console.log(pitches)
-   //stroke(map(amp,0,30,0,255),map(amp,0,30,0,255),map(amp,0,30,0,255));
-    rectColor[2].setAlpha(map(noise(amp),0,1,50,255));
-    stroke(rectColor[2]);
-   rectColor[0].setAlpha(map(noise(amp),0,1,50,255));
-  }
+       //strokeWeight(amp);
+        //strokeWeight(map(pitches[0][1],-1,11,2,6));
+        strokeWeight(map(amp,0,30,.5,3));
+        //console.log(pitches)
+        //stroke(map(amp,0,30,0,255),map(amp,0,30,0,255),map(amp,0,30,0,255));
+        // rectColor[2].setAlpha(map(noise(amp),0,1,50,255));
+         stroke(rectColor[2]);
+        //rectColor[0].setAlpha(map(noise(amp),0,1,50,255));
+  //}
+}
     
 
   
@@ -453,4 +454,6 @@ function find3largest(arr, arr_size)
     //console.log(first,second,third);
    return [first,second,third];
 }
+
+function windowResized(){resizeCanvas(windowWidth,windowHeight)}
  
