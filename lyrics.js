@@ -330,7 +330,8 @@ player.getCurrentState().then(state => {
     }
    
     }
-    strokeWeight(map(pitches[0][1],-1,11,2,6));
+    //strokeWeight(map(pitches[0][1],-1,11,2,6));
+    strokeWeight(amp);
    //console.log(pitches)
    //stroke(map(amp,0,30,0,255),map(amp,0,30,0,255),map(amp,0,30,0,255));
     rectColor[2].setAlpha(map(noise(amp),0,1,50,255));
