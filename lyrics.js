@@ -304,9 +304,9 @@ player.getCurrentState().then(state => {
         particles.push(createVector(random(width), random(height)));
       }
     }
-      for(let i = 0; i < beatData.length; i++) {
+      //for(let i = 0; i < beatData.length; i++) {
         //console.log(currentposition,beatData[i][0]);
-    if(floor(currentposition) >= beatData[i][0] && floor(currentposition) <= beatData[i][0]+beatData[i][1] ) {
+    //if(floor(currentposition) >= beatData[i][0] && floor(currentposition) <= beatData[i][0]+beatData[i][1] ) {
        // rectColor[2].setAlpha(100)
        //noiseSeed(millis())
       for (let j = 0; j < segmentData.length; j++) {
@@ -327,17 +327,18 @@ player.getCurrentState().then(state => {
 
        
       //console.log(amp)
-    }
+    //}
    
+    //}
+    
     }
     //strokeWeight(map(pitches[0][1],-1,11,2,6));
-    strokeWeight(amp);
+    strokeWeight(map(amp,0,60,1,12));
    //console.log(pitches)
    //stroke(map(amp,0,30,0,255),map(amp,0,30,0,255),map(amp,0,30,0,255));
     rectColor[2].setAlpha(map(noise(amp),0,1,50,255));
     stroke(rectColor[2]);
    rectColor[0].setAlpha(map(noise(amp),0,1,50,255));
-    }
   }
     
 
