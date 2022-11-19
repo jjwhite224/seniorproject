@@ -281,7 +281,7 @@ const quantization = (rgbValues, depth) => {
 
 function drawCube(particles,beatData,rectColor,noiseScale,num,segmentData,tempo,timesign,sections,bars) {
   
-  
+  frameRate(map(tempo*60,0,tempo,30,60));
   //rectColor[1].setAlpha(10); 
   let currentposition; 
   let pitches = [[]];
@@ -344,10 +344,10 @@ player.getCurrentState().then(state => {
       //noiseSeed(currentposition)
       pitches = find3largest(segmentData[j][3],segmentData[j][3].length);
       amp = segmentData[j][2]
-     
-       rectColor[0].setRed(red(rectColor[0])+map(amp,0,60,-30,30));
-       rectColor[0].setBlue(blue(rectColor[0])+map(amp,0,60,-30,30));
-       rectColor[0].setGreen(green(rectColor[0])+map(amp,0,60,-30,30));
+      rectColor[0].setRed(red(rectColor[0])+map(amp,0,100,-30,30));
+      rectColor[0].setBlue(blue(rectColor[0])+map(amp,0,100,-30,30));
+      rectColor[0].setGreen(green(rectColor[0])+map(amp,0,100,-30,30));
+       
         
         //console.log(amp);
         
@@ -372,6 +372,7 @@ player.getCurrentState().then(state => {
     rectColor[2].setAlpha(map(pitches[0][1],-1,11,50,200));
 
     stroke(rectColor[2]);
+    
   rectColor[0].setAlpha(map(pitches[0][1],-1,11,5,35));
 }
     
