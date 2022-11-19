@@ -108,7 +108,7 @@ if (colorFull == true){
     ;
     //stroke(0);
     
-    drawCube(particles,beatData,rectColor,noiseScale,num,segmentData,analysisJSON.track.tempo);
+    drawCube(particles,beatData,rectColor,noiseScale,num,segmentData,analysisJSON.track.tempo,analysisJSON.track.time_signature);
   }
 //.if(isPrepared == true){
 //player.getCurrentState().then(state => {
@@ -279,12 +279,13 @@ const quantization = (rgbValues, depth) => {
 
 
 
-function drawCube(particles,beatData,rectColor,noiseScale,num,segmentData,tempo) {
-  rectColor[1].setAlpha(10); 
+function drawCube(particles,beatData,rectColor,noiseScale,num,segmentData,tempo,timesign) {
+  //rectColor[1].setAlpha(10); 
   let currentposition; 
   let pitches = [[]]; 
+  let spd = tempo/50;
 //fill()
-noiseSeed(tempo)
+//console.log(timesign)
 //console.log(amp);
 ;
 player.getCurrentState().then(state => {
@@ -293,7 +294,7 @@ player.getCurrentState().then(state => {
   songlength = state.duration/1000
   songname = state.track_window.current_track.name;
   artist = state.track_window.current_track.artists[0].name
-  
+  let counter = 0
 
 
     if (particles.length == num){
@@ -304,9 +305,19 @@ player.getCurrentState().then(state => {
         particles.push(createVector(random(width), random(height)));
       }
     }
-      //for(let i = 0; i < beatData.length; i++) {
+      for(let i = 0; i < beatData.length; i++) {
+        
         //console.log(currentposition,beatData[i][0]);
-    //if(floor(currentposition) >= beatData[i][0] && floor(currentposition) <= beatData[i][0]+beatData[i][1] ) {
+        
+    if(floor(currentposition) > beatData[i][0] && floor(currentposition) < beatData[i][0]+beatData[i][1] ) {
+      noiseSeed(currentposition)
+      if (i%timesign^4 == 0){
+        spd = -spd
+      }
+    }
+  }
+
+
        // rectColor[2].setAlpha(100)
        //noiseSeed(millis())
       for (let j = 0; j < segmentData.length; j++) {
@@ -331,30 +342,31 @@ player.getCurrentState().then(state => {
    // }
     
     }
-       //strokeWeight(amp);
-        //strokeWeight(map(pitches[0][1],-1,11,2,6));
-        strokeWeight(map(amp,0,30,.5,3));
-        //console.log(pitches)
-        //stroke(map(amp,0,30,0,255),map(amp,0,30,0,255),map(amp,0,30,0,255));
-        // rectColor[2].setAlpha(map(noise(amp),0,1,50,255));
-         stroke(rectColor[2]);
-        //rectColor[0].setAlpha(map(noise(amp),0,1,50,255));
+       
   //}
+  //strokeWeight(amp);
+  strokeWeight(map(pitches[0][1],-1,11,.5,2));
+  // strokeWeight(map(amp,0,30,0,5));
+   //console.log(pitches)
+   //stroke(map(amp,0,30,0,255),map(amp,0,30,0,255),map(amp,0,30,0,255));
+    rectColor[2].setAlpha(map(pitches[0][1],-1,11,50,100));
+    stroke(rectColor[2]);
+   rectColor[0].setAlpha(map(pitches[0][1],-1,11,5,25));
 }
     
 
   
 for(let i = 0; i < num; i ++) {
   let p = particles[i];
-  rectColor[0].setAlpha(50);
+  //rectColor[0].setAlpha(50);
   
   fill(rectColor[3]);
   point(p.x,p.y)
   
   let n = noise(p.x * noiseScale, p.y * noiseScale, frameCount * noiseScale * noiseScale);
   let a = TAU * n;
-  p.x += cos(a) * tempo/100;
-  p.y += sin(a) * tempo/100;
+  p.x += cos(a) * spd;
+  p.y += sin(a) * spd;
   if(!onScreen(p)) {
     p.x = random(width);
     p.y = random(height);

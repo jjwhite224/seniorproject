@@ -74,7 +74,7 @@ window.onload = function(){auth = getToken('https://spotifyvizserver.herokuapp.c
 
             player.addListener('authentication_error', ({ message }) => {
                 console.error(message);
-                getToken('http://localhost:5000/refresh_token')
+                getToken('https://spotifyvizserver.herokuapp.com/refresh_token')
                 .then(response => console.log(response))
                 
             });
@@ -103,7 +103,7 @@ window.onload = function(){auth = getToken('https://spotifyvizserver.herokuapp.c
 //.then(json => parseJSON(json.album.images)) ;
 .then(json => {//img.src = json.album.images[0].url
   //console.log(trackJSON);
-  console.log(token);
+  //console.log(token);
   let dataJSON = fetch (json.analysis_url,{method:'GET', headers:{"Authorization":'Bearer ' + token,
 'Content-Type':'application/json',
  'Accept' :'application/json'                                                                                    }})
