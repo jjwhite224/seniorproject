@@ -108,7 +108,7 @@ if (colorFull == true){
     ;
     //stroke(0);
     
-    drawCube(particles,beatData,rectColor,noiseScale,num,segmentData,analysisJSON.track.tempo,analysisJSON.track.time_signature);
+    drawCube(particles,beatData,rectColor,noiseScale,num,segmentData,analysisJSON.track.tempo,analysisJSON.track.time_signature,analysisJSON.sections,analysisJSON.bars);
   }
 //.if(isPrepared == true){
 //player.getCurrentState().then(state => {
@@ -134,20 +134,20 @@ function loadLyrics(){
         //artist = trackJSON.artists[0].name;
         console.log(songname);
         console.log(artist);
-        loadJSON('https://api.musixmatch.com/ws/1.1/track.search?q_track='+songname+'&q_artist='+artist+'&f_has_lyrics=1&apikey=828251934ab71bde5ddf79419d12a713',searchLyrics);
+        //loadJSON('https://api.musixmatch.com/ws/1.1/track.search?q_track='+songname+'&q_artist='+artist+'&f_has_lyrics=1&apikey=828251934ab71bde5ddf79419d12a713',searchLyrics);
         trackLoaded = false;
     }
     
     
     }
 function searchLyrics(search){
-    console.log(search)
+    //console.log(search)
     trackId=search.message.body.track_list[0].track.track_id;
     trackname=search.message.body.track_list[0].track.track_name;
     artistname=search.message.body.track_list[0].track.artist_name;
     albumID=search.message.body.track_list[0].track.album_id;
     //console.log(trackId);
-    loadJSON("https://api.musixmatch.com/ws/1.1/track.lyrics.get?track_id="+trackId+"&apikey=828251934ab71bde5ddf79419d12a713",getLyrics);
+    //loadJSON("https://api.musixmatch.com/ws/1.1/track.lyrics.get?track_id="+trackId+"&apikey=828251934ab71bde5ddf79419d12a713",getLyrics);
     //loadJSON("https://api.musixmatch.com/ws/1.1/album.get?album_id="+albumID+"&apikey=828251934ab71bde5ddf79419d12a713",getAlbum);
     //loadJSON('http://ws.audioscrobbler.com/2.0/?method=track.getinfo&api_key=	ece64c4337c8a1bfd576483ec3c27355&artist='+artistname+'&track='+trackname+'&format=json',getAlbumart);
 }
@@ -279,21 +279,33 @@ const quantization = (rgbValues, depth) => {
 
 
 
-function drawCube(particles,beatData,rectColor,noiseScale,num,segmentData,tempo,timesign) {
+function drawCube(particles,beatData,rectColor,noiseScale,num,segmentData,tempo,timesign,sections,bars) {
+  
+  
   //rectColor[1].setAlpha(10); 
   let currentposition; 
-  let pitches = [[]]; 
-  let spd = tempo/50;
+  let pitches = [[]];
+  let spd;
+  
 //fill()
 //console.log(timesign)
 //console.log(amp);
 ;
 player.getCurrentState().then(state => {
+
   rectColor[1].setAlpha(255)
   currentposition = floor(state.position/1000)
   songlength = state.duration/1000
   songname = state.track_window.current_track.name;
   artist = state.track_window.current_track.artists[0].name
+  let tempoSect;
+  for(let i = 0;i<sections.length;i++){
+      if (floor(currentposition) >= sections[i].start && floor(currentposition) <= sections[i].start + sections[i].duration){
+      spd = sections[i].tempo/60
+      }
+    }
+      
+  
   let counter = 0
 
 
@@ -305,17 +317,22 @@ player.getCurrentState().then(state => {
         particles.push(createVector(random(width), random(height)));
       }
     }
-      for(let i = 0; i < beatData.length; i++) {
+    
+      for(let h = 0;h<bars.length;h++){
+       
+      //for(let i = 0; i < beatData.length; i++) {
         
         //console.log(currentposition,beatData[i][0]);
-        
-    if(floor(currentposition) > beatData[i][0] && floor(currentposition) < beatData[i][0]+beatData[i][1] ) {
-      noiseSeed(currentposition)
-      if (i%timesign^4 == 0){
+        if (floor(currentposition) >= bars[h].start && floor(currentposition) <= bars[h].start + bars[h].duration && h%timesign == 0){
+    //if(floor(currentposition) > beatData[i][0] && floor(currentposition) < beatData[i][0]+beatData[i][1] && i%timesign == 0){
         spd = -spd
+        noiseSeed(currentposition)
       }
-    }
+    //}
+
   }
+
+//}
 
 
        // rectColor[2].setAlpha(100)
@@ -328,6 +345,9 @@ player.getCurrentState().then(state => {
       pitches = find3largest(segmentData[j][3],segmentData[j][3].length);
       amp = segmentData[j][2]
      
+       rectColor[0].setRed(red(rectColor[0])+map(amp,0,60,-30,30));
+       rectColor[0].setBlue(blue(rectColor[0])+map(amp,0,60,-30,30));
+       rectColor[0].setGreen(green(rectColor[0])+map(amp,0,60,-30,30));
         
         //console.log(amp);
         
@@ -345,13 +365,14 @@ player.getCurrentState().then(state => {
        
   //}
   //strokeWeight(amp);
-  strokeWeight(map(pitches[0][1],-1,11,.5,2));
+  strokeWeight(map(pitches[0][1],-1,11,.5,2.5));
   // strokeWeight(map(amp,0,30,0,5));
    //console.log(pitches)
    //stroke(map(amp,0,30,0,255),map(amp,0,30,0,255),map(amp,0,30,0,255));
-    rectColor[2].setAlpha(map(pitches[0][1],-1,11,50,100));
+    rectColor[2].setAlpha(map(pitches[0][1],-1,11,50,200));
+
     stroke(rectColor[2]);
-   rectColor[0].setAlpha(map(pitches[0][1],-1,11,5,25));
+  rectColor[0].setAlpha(map(pitches[0][1],-1,11,5,35));
 }
     
 
@@ -360,7 +381,7 @@ for(let i = 0; i < num; i ++) {
   let p = particles[i];
   //rectColor[0].setAlpha(50);
   
-  fill(rectColor[3]);
+  //fill(rectColor[3]);
   point(p.x,p.y)
   
   let n = noise(p.x * noiseScale, p.y * noiseScale, frameCount * noiseScale * noiseScale);
@@ -372,15 +393,16 @@ for(let i = 0; i < num; i ++) {
     p.y = random(height);
   }
 }
-for(let i = 0; i < beatData.length; i++) {
-  
-}
+
 
 fill(rectColor[1]);
 //strokeWeight(2);
 //noStroke();
 text(songname+' by '+artist,width/2,height/2);
-background(rectColor[0])
+//colorMode(HSB)
+//rectColor[0].setHue(24)
+console.log(rectColor[0]);
+background(rectColor[0]);
 })
    //rectColor[3].setAlpha(10);
 
@@ -468,4 +490,49 @@ function find3largest(arr, arr_size)
 }
 
 function windowResized(){resizeCanvas(windowWidth,windowHeight)}
+
+function rgb_to_hsv(r , g , b) {
+ colorMode(HSB)
+  // R, G, B values are divided by 255
+  // to change the range from 0..255 to 0..1
+  r = r / 255.0;
+  g = g / 255.0;
+  b = b / 255.0;
+
+  // h, s, v = hue, saturation, value
+  var cmax = Math.max(r, Math.max(g, b)); // maximum of r, g, b
+  var cmin = Math.min(r, Math.min(g, b)); // minimum of r, g, b
+  var diff = cmax - cmin; // diff of cmax and cmin.
+  var h = -1, s = -1;
+
+  // if cmax and cmax are equal then h = 0
+  if (cmax == cmin)
+      h = 0;
+
+  // if cmax equal r then compute h
+  else if (cmax == r)
+      h = (60 * ((g - b) / diff) + 360) % 360;
+
+  // if cmax equal g then compute h
+  else if (cmax == g)
+      h = (60 * ((b - r) / diff) + 120) % 360;
+
+  // if cmax equal b then compute h
+  else if (cmax == b)
+      h = (60 * ((r - g) / diff) + 240) % 360;
+
+  // if cmax equal zero
+  if (cmax == 0)
+      s = 0;
+  else
+      s = (diff / cmax) * 100;
+
+  // compute v
+  var v = cmax * 100;
+  //document.write("(" + h.toFixed(1) + ", " + s + ", " + v + ")");
+
+  //let hsv = color(h,s,v)
+  return [h,s,v]
+}
+
  
