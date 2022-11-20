@@ -35,6 +35,7 @@ function setup(){
   maxD = dist(0, 0, 200, 200);
   //angleMode(DEGREES)
   //clear();
+  //blendMode(HARD_LIGHT)
 }
 
 function draw() {
@@ -60,14 +61,14 @@ function draw() {
     
       let colorFull =false;
       //console.log(quantcolors);
-      for(let i=0;i < 4;i++) {
+      for(let i=0;i < quantcolors.length;i++) {
         let c = color(quantcolors[i].r,quantcolors[i].g,quantcolors[i].b);
         rectColor.push(c);
         //console.log(c)
 
       }
       if (rectColor.length == quantcolors.length) {
-        
+        console.log(rectColor);
         colorFull = true;
 if (colorFull == true){
   //console.log(rectColor);
@@ -229,10 +230,10 @@ function getColorPallete(albumArt){
     rgbValues.push(rgb);
   }
   quantcolors = quantization(rgbValues,0);
-  console.log(quantcolors);
+  //console.log(quantcolors);
 }
 const quantization = (rgbValues, depth) => {
-  const MAX_DEPTH = 2;
+  const MAX_DEPTH = 3;
 
   // Base case
   if (depth === MAX_DEPTH || rgbValues.length === 0) {
@@ -280,7 +281,7 @@ const quantization = (rgbValues, depth) => {
 
 
 function drawCube(particles,beatData,rectColor,noiseScale,num,segmentData,tempo,timesign,sections,bars) {
-  
+ 
   frameRate(map(tempo*60,0,tempo,30,60));
   //rectColor[1].setAlpha(10); 
   let currentposition; 
@@ -318,19 +319,10 @@ player.getCurrentState().then(state => {
       }
     }
     
-      for(let h = 0;h<bars.length;h++){
-       
-      //for(let i = 0; i < beatData.length; i++) {
-        
-        //console.log(currentposition,beatData[i][0]);
-        if (floor(currentposition) >= bars[h].start && floor(currentposition) <= bars[h].start + bars[h].duration && h%timesign == 0){
-    //if(floor(currentposition) > beatData[i][0] && floor(currentposition) < beatData[i][0]+beatData[i][1] && i%timesign == 0){
-        spd = -spd
-        noiseSeed(currentposition)
-      }
+      
     //}
 
-  }
+  
 
 //}
 
@@ -339,14 +331,15 @@ player.getCurrentState().then(state => {
        //noiseSeed(millis())
       for (let j = 0; j < segmentData.length; j++) {
         //console.log(segmentData[j]);
+        //rectColor[2].setGreen(green(rectColor[0]))
+    //rectColor[2].setRed(red(rectColor[0]))
+    //rectColor[2].setBlue(blue(rectColor[0]))
         if(floor(currentposition) >= segmentData[j][0] && floor(currentposition) <= segmentData[j][0]+segmentData[j][1]){  
       //amp = map(segmentData[j][2],0,100,0,100)
       //noiseSeed(currentposition)
       pitches = find3largest(segmentData[j][3],segmentData[j][3].length);
       amp = segmentData[j][2]
-      rectColor[0].setRed(red(rectColor[0])+map(amp,0,100,-30,30));
-      rectColor[0].setBlue(blue(rectColor[0])+map(amp,0,100,-30,30));
-      rectColor[0].setGreen(green(rectColor[0])+map(amp,0,100,-30,30));
+      
        
         
         //console.log(amp);
@@ -354,27 +347,42 @@ player.getCurrentState().then(state => {
       // map(pitches[0][1],0,12,0,255);
        //pitchColor = (map(pitches[0][1],0,12,0,255));
        //stroke(map(pitches[0][1],0,12,0,255),map(pitches[0][2],0,12,0,255),map(pitches[0][3],0,12,0,255));
-
-       
+       strokeWeight(map(pitches[0][1],-1,11,1,2));
+  // strokeWeight(map(amp,0,30,0,5));
+   //console.log(pitches)
+   //stroke(map(amp,0,30,0,255),map(amp,0,30,0,255),map(amp,0,30,0,255));
+    rectColor[6].setAlpha(map(pitches[0][1],-1,11,255,0))
+ //rectColor[4].setRed(red(rectColor[0])+map(amp,0,30,-5,5));
+      //rectColor[4].setBlue(blue(rectColor[0])+map(amp,0,30,-5,5));
+      //rectColor[4].setGreen(green(rectColor[0])+map(amp,0,30,-5,5));
+    stroke(rectColor[6]);
+    rectColor[2].setAlpha(map(pitches[0][1],-1,11,5,0,255));
       //console.log(amp)
     //\\}
-   
+    for(let h = 0;h<bars.length;h++){
+       
+      //for(let i = 0; i < beatData.length; i++) {
+        
+        //console.log(currentposition,beatData[i][0]);
+        if (floor(currentposition) > bars[h].start && floor(currentposition) < bars[h].start + bars[h].duration && h%timesign == 0){
+    //if(floor(currentposition) > beatData[i][0] && floor(currentposition) < beatData[i][0]+beatData[i][1] && i%timesign == 0){
+      //rectColor[6].setAlpha(50);
+        spd = -spd
+        noiseSeed(currentposition)
+      }
    // }
     
     }
        
   //}
   //strokeWeight(amp);
-  strokeWeight(map(pitches[0][1],-1,11,.5,2.5));
-  // strokeWeight(map(amp,0,30,0,5));
-   //console.log(pitches)
-   //stroke(map(amp,0,30,0,255),map(amp,0,30,0,255),map(amp,0,30,0,255));
-    rectColor[2].setAlpha(map(pitches[0][1],-1,11,50,200));
-
-    stroke(rectColor[2]);
+        }
+    }
+   
     
-  rectColor[0].setAlpha(map(pitches[0][1],-1,11,5,35));
-}
+    
+  
+
     
 
   
@@ -382,7 +390,7 @@ for(let i = 0; i < num; i ++) {
   let p = particles[i];
   //rectColor[0].setAlpha(50);
   
-  //fill(rectColor[3]);
+ // fill(rectColor[4]);
   point(p.x,p.y)
   
   let n = noise(p.x * noiseScale, p.y * noiseScale, frameCount * noiseScale * noiseScale);
@@ -396,14 +404,14 @@ for(let i = 0; i < num; i ++) {
 }
 
 
-fill(rectColor[1]);
+fill(rectColor[4]);
 //strokeWeight(2);
 //noStroke();
 text(songname+' by '+artist,width/2,height/2);
 //colorMode(HSB)
 //rectColor[0].setHue(24)
-console.log(rectColor[0]);
-background(rectColor[0]);
+//console.log(rectColor[0]);
+background(rectColor[2]);
 })
    //rectColor[3].setAlpha(10);
 
