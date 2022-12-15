@@ -20,6 +20,7 @@ let amp;
 let particles = [];
 let particlesFull = false;
 let pitchesFull = false;
+let beathit = false;
 //const noiseScale = .1;
 function setup(){
     //createCanvas(400,400);
@@ -36,13 +37,14 @@ function setup(){
   //angleMode(DEGREES)
   //clear();
   //blendMode(HARD_LIGHT)
+  
 }
 
 function draw() {
   
  // frameRate(1)
   //background(0);
-  loadLyrics();
+ 
   //fill(0,4);
   //screenText = createGraphics(width,height);
   
@@ -57,9 +59,10 @@ function draw() {
  
   if (analysisLoaded == true){
     //console.log(analysisJSON);
+    loadLyrics();
     let rectColor=[];
     
-      let colorFull =false;
+      let colorFull = false;
       //console.log(quantcolors);
       for(let i=0;i < quantcolors.length;i++) {
         let c = color(quantcolors[i].r,quantcolors[i].g,quantcolors[i].b);
@@ -68,7 +71,7 @@ function draw() {
 
       }
       if (rectColor.length == quantcolors.length) {
-        console.log(rectColor);
+        //console.log(rectColor);
         colorFull = true;
 if (colorFull == true){
   //console.log(rectColor);
@@ -102,14 +105,15 @@ if (colorFull == true){
     
     
     //console.log(amp);
-    const num = segmentData.length * 2; 
-    const noiseScale = map(analysisJSON.track.tempo,0,300,.001,.01);
+    const num = segmentData.length; 
+    const noiseScale = map(analysisJSON.track.tempo,0,300,0,.01);
   
 
     ;
     //stroke(0);
     
     drawCube(particles,beatData,rectColor,noiseScale,num,segmentData,analysisJSON.track.tempo,analysisJSON.track.time_signature,analysisJSON.sections,analysisJSON.bars);
+  
   }
 //.if(isPrepared == true){
 //player.getCurrentState().then(state => {
@@ -282,7 +286,7 @@ const quantization = (rgbValues, depth) => {
 
 function drawCube(particles,beatData,rectColor,noiseScale,num,segmentData,tempo,timesign,sections,bars) {
  
-  frameRate(map(tempo*60,0,tempo,30,60));
+  frameRate(map(tempo*60,0,tempo,50,60));
   //rectColor[1].setAlpha(10); 
   let currentposition; 
   let pitches = [[]];
@@ -294,7 +298,7 @@ function drawCube(particles,beatData,rectColor,noiseScale,num,segmentData,tempo,
 ;
 player.getCurrentState().then(state => {
 
-  rectColor[1].setAlpha(255)
+  //rectColor[1].setAlpha(255)
   currentposition = floor(state.position/1000)
   songlength = state.duration/1000
   songname = state.track_window.current_track.name;
@@ -340,42 +344,68 @@ player.getCurrentState().then(state => {
       pitches = find3largest(segmentData[j][3],segmentData[j][3].length);
       amp = segmentData[j][2]
       
-       
+
         
         //console.log(amp);
         
       // map(pitches[0][1],0,12,0,255);
        //pitchColor = (map(pitches[0][1],0,12,0,255));
        //stroke(map(pitches[0][1],0,12,0,255),map(pitches[0][2],0,12,0,255),map(pitches[0][3],0,12,0,255));
-       strokeWeight(map(pitches[0][1],-1,11,1,2));
-  // strokeWeight(map(amp,0,30,0,5));
+       //if(floor(currentposition) > beatData[i][0] && floor(currentposition) < beatData[i][0]+beatData[i][1] && i%timesign == 0){
+      //rectColor[6].setAlpha(50);
+        // strokeWeight(map(amp,0,30,0,5));
    //console.log(pitches)
    //stroke(map(amp,0,30,0,255),map(amp,0,30,0,255),map(amp,0,30,0,255));
-    rectColor[6].setAlpha(map(pitches[0][1],-1,11,255,0))
- //rectColor[4].setRed(red(rectColor[0])+map(amp,0,30,-5,5));
-      //rectColor[4].setBlue(blue(rectColor[0])+map(amp,0,30,-5,5));
-      //rectColor[4].setGreen(green(rectColor[0])+map(amp,0,30,-5,5));
-    stroke(rectColor[6]);
-    rectColor[2].setAlpha(map(pitches[0][1],-1,11,5,0,255));
+   // rectColor[5].setAlpha(map(pitches[0][1],-1,11,200,255))
+    //rectColor[4].setRed(red(rectColor[0])+map(amp,0,30,-5,5));
+         //rectColor[4].setBlue(blue(rectColor[0])+map(amp,0,30,-5,5));
+         //rectColor[4].setGreen(green(rectColor[0])+map(amp,0,30,-5,5));
+      // stroke(rectColor[5]);
+       //fill(rectColor[6])
+      // rectColor[3].setAlpha(map(amp,0,50,10,50));
+      //background(rectColor[3])
       //console.log(amp)
     //\\}
+   
+       
+  //}
+  //strokeWeight(amp);
+        }
+        strokeWeight(map(amp,0,50,1,6));
+    }
+
     for(let h = 0;h<bars.length;h++){
        
       //for(let i = 0; i < beatData.length; i++) {
         
         //console.log(currentposition,beatData[i][0]);
-        if (floor(currentposition) > bars[h].start && floor(currentposition) < bars[h].start + bars[h].duration && h%timesign == 0){
+        if (floor(currentposition) > bars[h].start && floor(currentposition) < bars[h].start + bars[h].duration ){
+        if (h%timesign == 0 && beathit == false){
+          spd = -spd
+        noiseSeed(currentposition)
+        rectColor[5].setAlpha(map(amp,0,50,10,25));
+      background(rectColor[5])
+      rectColor[3].setAlpha(map(pitches[0][1],-1,11,100,255))
+      stroke(rectColor[3])
+      
+      beathit = true;
+        }else{
     //if(floor(currentposition) > beatData[i][0] && floor(currentposition) < beatData[i][0]+beatData[i][1] && i%timesign == 0){
       //rectColor[6].setAlpha(50);
-        spd = -spd
-        noiseSeed(currentposition)
+        // strokeWeight(map(amp,0,30,0,5));
+   //console.log(pitches)
+   //stroke(map(amp,0,30,0,255),map(amp,0,30,0,255),map(amp,0,30,0,255));
+    rectColor[4].setAlpha(map(pitches[0][1],-1,11,100,255))
+    //rectColor[4].setRed(red(rectColor[0])+map(amp,0,30,-5,5));
+         //rectColor[4].setBlue(blue(rectColor[0])+map(amp,0,30,-5,5));
+         //rectColor[4].setGreen(green(rectColor[0])+map(amp,0,30,-5,5));
+       stroke(rectColor[4]);
+       //fill(rectColor[6])
+       rectColor[6].setAlpha(map(amp,0,50,10,25));
+       background(rectColor[6]);
+      
       }
-   // }
-    
-    }
-       
-  //}
-  //strokeWeight(amp);
+   beathit = false;
         }
     }
    
@@ -404,14 +434,14 @@ for(let i = 0; i < num; i ++) {
 }
 
 
-fill(rectColor[4]);
+fill(rectColor[0]);
 //strokeWeight(2);
 //noStroke();
 text(songname+' by '+artist,width/2,height/2);
 //colorMode(HSB)
 //rectColor[0].setHue(24)
 //console.log(rectColor[0]);
-background(rectColor[2]);
+//background(rectColor[1])
 })
    //rectColor[3].setAlpha(10);
 
