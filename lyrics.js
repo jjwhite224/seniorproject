@@ -59,6 +59,7 @@ function draw() {
  
   if (analysisLoaded == true){
     //console.log(analysisJSON);
+    
     loadLyrics();
     let rectColor=[];
     
@@ -74,6 +75,7 @@ function draw() {
         //console.log(rectColor);
         colorFull = true;
 if (colorFull == true){
+  document.querySelector('canvas').click();
   //console.log(rectColor);
   colorFull = false;
 }
@@ -95,7 +97,7 @@ if (colorFull == true){
     beatData = [];
     for(let i = 0; i < analysisJSON.segments.length; i++) {
       const segment = analysisJSON.segments[i];
-      segmentData.push([segment.start,segment.duration,abs(segment.loudness_max),segment.pitches]);
+      segmentData.push([segment.start,segment.duration,segment.loudness_max,segment.pitches]);
     }
     for(let i = 0; i < analysisJSON.beats.length; i++) {
       const beats = analysisJSON.beats[i];
@@ -371,7 +373,7 @@ player.getCurrentState().then(state => {
   //}
   //strokeWeight(amp);
         }
-        strokeWeight(map(amp,0,50,1,6));
+        
     }
 
     for(let h = 0;h<bars.length;h++){
@@ -383,9 +385,9 @@ player.getCurrentState().then(state => {
         if (h%timesign == 0 && beathit == false){
           spd = -spd
         noiseSeed(currentposition)
-        rectColor[5].setAlpha(map(amp,0,50,10,25));
+        rectColor[5].setAlpha(map(amp,-52,0,10,25));
       background(rectColor[5])
-      rectColor[3].setAlpha(map(pitches[0][1],-1,11,100,255))
+      rectColor[3].setAlpha(map(pitches[0][1],-1,11,50,255))
       stroke(rectColor[3])
       
       beathit = true;
@@ -395,16 +397,18 @@ player.getCurrentState().then(state => {
         // strokeWeight(map(amp,0,30,0,5));
    //console.log(pitches)
    //stroke(map(amp,0,30,0,255),map(amp,0,30,0,255),map(amp,0,30,0,255));
-    rectColor[4].setAlpha(map(pitches[0][1],-1,11,100,255))
+    rectColor[4].setAlpha(map(pitches[0][1],-1,11,50,255))
     //rectColor[4].setRed(red(rectColor[0])+map(amp,0,30,-5,5));
          //rectColor[4].setBlue(blue(rectColor[0])+map(amp,0,30,-5,5));
          //rectColor[4].setGreen(green(rectColor[0])+map(amp,0,30,-5,5));
        stroke(rectColor[4]);
        //fill(rectColor[6])
-       rectColor[6].setAlpha(map(amp,0,50,10,25));
+       rectColor[6].setAlpha(map(amp,-52,0,10,25));
        background(rectColor[6]);
       
       }
+      console.log(amp)
+      strokeWeight(map(amp,-52,0,0,2));
    beathit = false;
         }
     }
