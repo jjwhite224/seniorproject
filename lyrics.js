@@ -20,12 +20,24 @@ let amp;
 let particles = [];
 let particlesFull = false;
 let pitchesFull = false;
-let beathit = false;
+var gifarray = [];
+let playing = false;
+var gifvid;
+var mygif;
+var vidloaded = false;
+var gifs;
+var gifnum = 0;
+//let beathit = false;
 //const noiseScale = .1;
+function preload(){
+  
+  }
 function setup(){
-    //createCanvas(400,400);
-    createCanvas(windowWidth,windowHeight);
-    fullscreen();
+  createCanvas(windowWidth,windowHeight);
+   
+  //reateCanvas(400,400);
+    //fullscreen();
+    
     //noStroke();
     //strokeWeight(2);
     mastodon =  loadFont('assets/MASTOD__.ttf')
@@ -41,9 +53,9 @@ function setup(){
 }
 
 function draw() {
-  
+  //background()
  // frameRate(1)
-  //background(0);
+  //background(0,0);
  
   //fill(0,4);
   //screenText = createGraphics(width,height);
@@ -59,7 +71,7 @@ function draw() {
  
   if (analysisLoaded == true){
     //console.log(analysisJSON);
-    
+   
     loadLyrics();
     let rectColor=[];
     
@@ -77,6 +89,13 @@ function draw() {
 if (colorFull == true){
   document.querySelector('canvas').click();
   //console.log(rectColor);
+  
+
+    //rectColor[1].setAlpha(255)
+    
+   
+    
+  
   colorFull = false;
 }
 //colorFull = false;
@@ -97,7 +116,7 @@ if (colorFull == true){
     beatData = [];
     for(let i = 0; i < analysisJSON.segments.length; i++) {
       const segment = analysisJSON.segments[i];
-      segmentData.push([segment.start,segment.duration,segment.loudness_max,segment.pitches]);
+      segmentData.push([segment.start,segment.duration,(((segment.loudness_max-segment.loudness_start)/segment.loudness_max_time)/100),segment.pitches]);
     }
     for(let i = 0; i < analysisJSON.beats.length; i++) {
       const beats = analysisJSON.beats[i];
@@ -113,8 +132,8 @@ if (colorFull == true){
 
     ;
     //stroke(0);
-    
-    drawCube(particles,beatData,rectColor,noiseScale,num,segmentData,analysisJSON.track.tempo,analysisJSON.track.time_signature,analysisJSON.sections,analysisJSON.bars);
+    //console.log(segmentData)
+    drawCube(particles,beatData,rectColor,noiseScale,num,segmentData,analysisJSON.track.tempo,analysisJSON.track.time_signature,analysisJSON.sections,analysisJSON.segments,gifvid);
   
   }
 //.if(isPrepared == true){
@@ -137,12 +156,15 @@ function loadLyrics(){
     if (trackLoaded == true){
        console.log(trackJSON);
        trackPic = loadImage(trackJSON.album.images[0].url,getColorPallete);
-        //songname = trackJSON.name;
-        //artist = trackJSON.artists[0].name;
+        songname = trackJSON.name;
+        artist = trackJSON.artists[0].name;
         console.log(songname);
         console.log(artist);
+        gifs = loadJSON('https://api.giphy.com/v1/gifs/search?api_key=Y9OfF5m05o8BZJ5MAjOY9CDXg8XVcY20&q='+artist+'.&limit=25&offset=0&rating=r&lang=en',pickGif);
+    console.log(gifs)
         //loadJSON('https://api.musixmatch.com/ws/1.1/track.search?q_track='+songname+'&q_artist='+artist+'&f_has_lyrics=1&apikey=828251934ab71bde5ddf79419d12a713',searchLyrics);
         trackLoaded = false;
+        
     }
     
     
@@ -286,8 +308,8 @@ const quantization = (rgbValues, depth) => {
 
 
 
-function drawCube(particles,beatData,rectColor,noiseScale,num,segmentData,tempo,timesign,sections,bars) {
- 
+function drawCube(particles,beatData,rectColor,noiseScale,num,segmentData,tempo,timesign,sections,bars,gifvid) {
+  
   frameRate(map(tempo*60,0,tempo,50,60));
   //rectColor[1].setAlpha(10); 
   let currentposition; 
@@ -306,6 +328,8 @@ player.getCurrentState().then(state => {
   songname = state.track_window.current_track.name;
   artist = state.track_window.current_track.artists[0].name
   let tempoSect;
+  
+ 
   for(let i = 0;i<sections.length;i++){
       if (floor(currentposition) >= sections[i].start && floor(currentposition) <= sections[i].start + sections[i].duration){
       spd = sections[i].tempo/60
@@ -336,7 +360,7 @@ player.getCurrentState().then(state => {
        // rectColor[2].setAlpha(100)
        //noiseSeed(millis())
       for (let j = 0; j < segmentData.length; j++) {
-        //console.log(segmentData[j]);
+        //console.log(segmentData);
         //rectColor[2].setGreen(green(rectColor[0]))
     //rectColor[2].setRed(red(rectColor[0]))
     //rectColor[2].setBlue(blue(rectColor[0]))
@@ -347,9 +371,11 @@ player.getCurrentState().then(state => {
       amp = segmentData[j][2]
       
 
-        
-        //console.log(amp);
-        
+     // console.log(amp);
+      strokeWeight(map(amp,0,10,1,4));
+       // console.log(pitches);
+        //console.log((pitches[0][1]+pitches[1][1]+pitches[2][1]));
+        noiseSeed(currentposition)
       // map(pitches[0][1],0,12,0,255);
        //pitchColor = (map(pitches[0][1],0,12,0,255));
        //stroke(map(pitches[0][1],0,12,0,255),map(pitches[0][2],0,12,0,255),map(pitches[0][3],0,12,0,255));
@@ -375,43 +401,53 @@ player.getCurrentState().then(state => {
         }
         
     }
-
+   
     for(let h = 0;h<bars.length;h++){
-       
+      
       //for(let i = 0; i < beatData.length; i++) {
         
         //console.log(currentposition,beatData[i][0]);
+        
         if (floor(currentposition) > bars[h].start && floor(currentposition) < bars[h].start + bars[h].duration ){
-        if (h%timesign == 0 && beathit == false){
-          spd = -spd
-        noiseSeed(currentposition)
-        rectColor[5].setAlpha(map(amp,-52,0,10,25));
-      background(rectColor[5])
-      rectColor[3].setAlpha(map(pitches[0][1],-1,11,50,255))
-      stroke(rectColor[3])
+          //console.log(h/timesign)
+          if (h%timesign == 0){
+           
+            spd = -spd
+            rectColor[5].setAlpha(map((pitches[0][1]+pitches[1][1]+pitches[2][1]),0,24,4,14))
+        //rectColor[5].setAlpha(map(amp,0,4,0,15));
+      fill(rectColor[5])
+    rect(0,0,windowWidth,windowHeight)
+      rectColor[1].setAlpha(map((pitches[0][1]+pitches[1][1]+pitches[2][1]),0,24,50,200))
+      stroke(rectColor[1])
       
-      beathit = true;
+      
         }else{
     //if(floor(currentposition) > beatData[i][0] && floor(currentposition) < beatData[i][0]+beatData[i][1] && i%timesign == 0){
       //rectColor[6].setAlpha(50);
         // strokeWeight(map(amp,0,30,0,5));
    //console.log(pitches)
    //stroke(map(amp,0,30,0,255),map(amp,0,30,0,255),map(amp,0,30,0,255));
-    rectColor[4].setAlpha(map(pitches[0][1],-1,11,50,255))
+    rectColor[4].setAlpha(map((pitches[0][1]+pitches[1][1]+pitches[2][1]),0,24,50,200))
     //rectColor[4].setRed(red(rectColor[0])+map(amp,0,30,-5,5));
          //rectColor[4].setBlue(blue(rectColor[0])+map(amp,0,30,-5,5));
          //rectColor[4].setGreen(green(rectColor[0])+map(amp,0,30,-5,5));
        stroke(rectColor[4]);
        //fill(rectColor[6])
-       rectColor[6].setAlpha(map(amp,-52,0,10,25));
-       background(rectColor[6]);
-      
+       //rectColor[2].setAlpha(map(amp,0,4,0,15));
+       rectColor[2].setAlpha(map((pitches[0][1]+pitches[1][1]+pitches[2][1]),0,24,4,14))
+       fill(rectColor[2]);
+       rect(0,0,windowWidth,windowHeight)
+       //if (currentposition>0 && playing == false && vidloaded == true){
+ 
+        
+      //}
       }
-      console.log(amp)
-      strokeWeight(map(amp,-52,0,0,2));
-   beathit = false;
+      //console.log(amp)
+      
+      //strokeWeight(amp)
         }
-    }
+     }
+    
    
     
     
@@ -441,14 +477,19 @@ for(let i = 0; i < num; i ++) {
 fill(rectColor[0]);
 //strokeWeight(2);
 //noStroke();
+
 text(songname+' by '+artist,width/2,height/2);
+
 //colorMode(HSB)
 //rectColor[0].setHue(24)
 //console.log(rectColor[0]);
 //background(rectColor[1])
+tint(255,map(amp,0,10,1,25))
+image(gifvid,0,0,windowWidth,windowHeight)
+
 })
    //rectColor[3].setAlpha(10);
-
+  
 }
 
 
@@ -578,4 +619,27 @@ function rgb_to_hsv(r , g , b) {
   return [h,s,v]
 }
 
- 
+function pickGif(){
+  for(var i=0;i<gifs.data.length;i++){
+    gif = gifs.data[i].images.looping.mp4;
+    append(gifarray,gif)
+  }
+  mygifnum = floor(random(gifarray.length))
+  mygif = gifarray[mygifnum]
+  console.log(mygif)
+  gifvid = createVideo(mygif,vidLoaded)
+  gifvid.hide()
+}
+function vidLoaded(){vidloaded=true;console.log(vidloaded);gifvid.loop();player.getCurrentState().then(state => {currentposition = floor(state.position/1000);
+songlength = state.duration/1000; })
+  playing = true;}
+  function nextVid(){
+    //gifnum += 1;
+    //clear();
+    gifnum += 1;
+    gifvid.remove();
+    gifvid=createVideo(gifarray[gifnum],vidLoaded);
+    gifvid.hide();
+    
+  }
+  function keyPressed(){if(keyCode==32){nextVid()}}
